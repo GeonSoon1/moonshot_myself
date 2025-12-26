@@ -1,0 +1,41 @@
+### 환경 변수 설정
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### 1. 회원가입
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser2@example.com",
+  "password": "testpassword",
+  "name": "testuser2",
+  "profileImage": "https://example.com/files/image.png"
+}
+
+
+### 2. 로그인 
+# @name login 
+// 로그인 요청(POST) 바로 윗줄에 이 주석을 달아두었죠? 이것은 해당 요청의 이름을 login이라고 이름표를 붙인 것입니다.
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser2@example.com",
+  "password": "testpassword"
+}
+
+### 로그인 결과에서 토큰 추출 (REST Client 전용 변수)
+// login : login이라는 이름표가 붙은 요청
+// .response : 그 요청의 결과(응답)를 가져오라는 뜻입니다.
+// .body : 응답 중에서도 헤더가 아닌 '본문(JSON 데이터)'을 보겠다는 뜻입니다.
+@accessToken = {{login.response.body.accessToken}}
+@refreshToken = {{login.response.body.refreshToken}}
+
+
+### 3. 토큰 갱신 (Refresh Token 사용)
+# 주의: 위 로그인 단계가 성공한 후 수행하세요.
+POST {{baseUrl}}/auth/refresh
+Authorization: Bearer {{refreshToken}}
+Content-Type: {{contentType}}
+

@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
+  name           String
+  profileImage   String?
+  passwordHash   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  oauthAccounts  OAuthAccount[]
+  sessions       Session[]
+  ownedProjects  Project[]       @relation("ProjectOwner")
+  invitations    Invitation[]    @relation("InvitationInvitee")
+  projectMembers ProjectMember[]
+}
+
+model OAuthAccount {
+  id                Int           @id @default(autoincrement())
+  provider          OAuthProvider
+  providerAccountId String //sub?
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         DateTime?
+  scope             String[]
+  userId            Int
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId], name: "oauth_provider_account_unique")
+}
+
+model Session {
+  id               Int       @id @default(autoincrement())
+  refreshTokenHash String
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  userId           Int
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String
+  ownerId        Int
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  owner          User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  invitations    Invitation[]
+  projectMembers ProjectMember[]
+  tasks          Task[]
+}
+
+model Invitation {
+  id            String           @id @default(uuid())
+  status        InvitationStatus @default(PENDING)
+  projectId     Int
+  inviteeUserId Int
+  createdAt     DateTime         @default(now())
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  inviteeUser   User             @relation("InvitationInvitee", fields: [inviteeUserId], references: [id], onDelete: Cascade)
+  projectMember ProjectMember?
+}
+
+model ProjectMember {
+  projectId      Int
+  memberId       Int
+  role           MemberRole
+  invitationId   String?     @unique
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  project        Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  member         User        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  invitation     Invitation? @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  tasksAssigned  Task[]      @relation("TaskAssigneeMember")
+  tasksCreator   Task[]      @relation("TaskCreateMember")
+  commentCreator Comment[]   @relation("CommentCreateMember")
+
+  @@id([projectId, memberId]) //
+}
+
+model Task {
+  id                      Int           @id @default(autoincrement())
+  title                   String
+  description             String?
+  status                  TaskStatus    @default(TODO)
+  startDate               DateTime
+  endDate                 DateTime
+  projectId               Int
+  taskCreatorId           Int
+  assigneeProjectMemberId Int
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  project                 Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeProjectMember   ProjectMember @relation("TaskAssigneeMember", fields: [assigneeProjectMemberId, projectId], references: [memberId, projectId], onDelete: Restrict)
+  creatorProjectMember    ProjectMember @relation("TaskCreateMember", fields: [taskCreatorId, projectId], references: [memberId, projectId], onDelete: Restrict)
+  subTasks                SubTask[]
+  attachments             Attachment[]
+  taskTags                TaskTag[]
+  comments                Comment[]
+
+  @@unique([id, projectId])
+}
+
+model SubTask {
+  id        Int        @id @default(autoincrement())
+  title     String
+  status    TaskStatus @default(TODO)
+  taskId    Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  task      Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  url       String
+  taskId    Int
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Tag {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  taskTags TaskTag[]
+}
+
+model TaskTag {
+  taskId Int
+  tagId  Int
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+}
+
+model Comment {
+  id        Int           @id @default(autoincrement())
+  content   String
+  taskId    Int
+  projectId Int
+  authorId  Int
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  task      Task          @relation(fields: [taskId, projectId], references: [id, projectId], onDelete: Cascade)
+  author    ProjectMember @relation("CommentCreateMember", fields: [authorId, projectId], references: [memberId, projectId], onDelete: Cascade)
+}
+
+enum OAuthProvider {
+  GOOGLE
+  KAKAO
+  NAVER
+  FACEBOOK
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum MemberRole {
+  OWNER
+  MEMBER
+}
