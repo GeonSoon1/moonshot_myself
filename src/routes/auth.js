@@ -73,7 +73,7 @@ router.post("/login", async (req, res) => {
 
     // 3. 토큰 생성
     const accessToken = jwt.sign({ userId: user.id }, ACCESS_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "3d",
     });
     const refreshToken = jwt.sign({ userId: user.id }, REFRESH_SECRET, {
       expiresIn: "7d",
@@ -100,16 +100,15 @@ router.post("/login", async (req, res) => {
 // [3] 토큰 갱신 (POST /auth/refresh)
 router.post("/refresh", async (req, res) => {
   // console.log("req.headers 값 : ", req.headers);
-//   req.headers 값 :  {
-//   'user-agent': 'vscode-restclient',
-//   authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2NjcyNjA2MCwiZXhwIjoxNzY3MzMwODYwfQ.pmHjeVgX3mSsBS3J6eCavoPrm3fT6kWPfsqZkJ2b2As',
-//   'content-type': 'application/json',
-//   'accept-encoding': 'gzip, deflate',
-//   host: 'localhost:3000',
-//   connection: 'close',
-//   'content-length': '0'
-// }
-  
+  //   req.headers 값 :  {
+  //   'user-agent': 'vscode-restclient',
+  //   authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2NjcyNjA2MCwiZXhwIjoxNzY3MzMwODYwfQ.pmHjeVgX3mSsBS3J6eCavoPrm3fT6kWPfsqZkJ2b2As',
+  //   'content-type': 'application/json',
+  //   'accept-encoding': 'gzip, deflate',
+  //   host: 'localhost:3000',
+  //   connection: 'close',
+  //   'content-length': '0'
+  // }
 
   const authHeader = req.headers["authorization"];
   // console.log("authHeader 값 : ", authHeader);
@@ -137,18 +136,17 @@ router.post("/refresh", async (req, res) => {
       },
     });
     // console.log('sessions 값 : ', sessions)
-//     sessions 값 :  [
-//   {
-//     id: 3,
-//     refreshTokenHash: '$2b$10$JbxXTOV0P90OVFmGJbDGxeccggnLs.rs7MjaY7T431oALiEIBo9jK',
-//     expiresAt: 2026-01-02T07:31:55.715Z,
-//     revokedAt: null,
-//     userId: 1,
-//     createdAt: 2025-12-26T07:31:55.716Z,
-//     updatedAt: 2025-12-26T07:31:55.716Z
-//   }
-// ]
-
+    //     sessions 값 :  [
+    //   {
+    //     id: 3,
+    //     refreshTokenHash: '$2b$10$JbxXTOV0P90OVFmGJbDGxeccggnLs.rs7MjaY7T431oALiEIBo9jK',
+    //     expiresAt: 2026-01-02T07:31:55.715Z,
+    //     revokedAt: null,
+    //     userId: 1,
+    //     createdAt: 2025-12-26T07:31:55.716Z,
+    //     updatedAt: 2025-12-26T07:31:55.716Z
+    //   }
+    // ]
 
     // 실제 전달받은 토큰과 DB에 저장된 해시값이 일치하는 세션 찾기
     let validSession = null;

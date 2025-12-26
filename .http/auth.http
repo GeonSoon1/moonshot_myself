@@ -7,8 +7,8 @@ POST {{baseUrl}}/auth/register
 Content-Type: {{contentType}}
 
 {
-  "email": "testuser2@example.com",
-  "password": "testpassword",
+  "email": "assignee1@example.com",
+  "password": "1234",
   "name": "testuser2",
   "profileImage": "https://example.com/files/image.png"
 }
@@ -21,8 +21,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "testuser2@example.com",
-  "password": "testpassword"
+  "email": "assignee1@example.com",
+  "password": "1234"
 }
 
 ### 로그인 결과에서 토큰 추출 (REST Client 전용 변수)
