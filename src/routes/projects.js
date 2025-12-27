@@ -35,7 +35,7 @@ async function getProjectWithCounts(projectId) {
     (t) => t.status === "IN_PROGRESS"
   ).length;
   const doneCount = project.tasks.filter((t) => t.status === "DONE").length;
-  console.log("project.tasks의 값 : ", project.tasks);
+  // console.log("project.tasks의 값 : ", project.tasks);
 
   // project.tasks의 모습(예상)
   //   "tasks": [
@@ -291,7 +291,7 @@ router.get("/:projectId/users", authenticateToken, async (req, res) => {
       where: { projectId: Number(projectId) },
     });
 
-    console.log("[projects.js] 초대받은 사람들의 데이터 : ", invitations);
+    // console.log("[projects.js] 초대받은 사람들의 데이터 : ", invitations);
 
     // 4. 초대받은 사람들의 데이터를 명세서 포맷으로 가공
     const invitationData = invitations.map((inv) => ({
@@ -432,7 +432,7 @@ router.post("/:projectId/tasks", authenticateToken, async (req, res) => {
         attachments: true
       }
     });
-    console.log(task)
+    // console.log(task)
     return res.status(200).json(formatTask(task));
   } catch (error) {
     console.error(error);

@@ -7,7 +7,7 @@ POST {{baseUrl}}/auth/register
 Content-Type: {{contentType}}
 
 {
-  "email": "projectOwner2@example.com",
+  "email": "commentMember1@example.com",
   "password": "1234",
   "name": "testuser2",
   "profileImage": "https://example.com/files/image.png"
@@ -21,7 +21,7 @@ POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "assignee2@example.com",
+  "email": "commentMember1@example.com",
   "password": "1234"
 }
 
