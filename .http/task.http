@@ -1,0 +1,73 @@
+@baseUrl = http://localhost:3000
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc2Njg0MjY0OCwiZXhwIjoxNzY3MTAxODQ4fQ.Qzd2gF56V-vJsKO_LJRR3S4bzqkbuOvbFP71aHCYrIY
+
+
+# 테스트에 사용할 ID들 (본인의 DB 상황에 맞게 수정하세요)
+@projectId = 5
+@assigneeId = 5
+
+### [1] 프로젝트에 할 일 생성
+# @name createTask
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Prisma 스키마 완성하기2",
+  "description": "팀원들과 함께 태스크 모델까지 구현을 완료합니다.",
+  "startYear": 2025,
+  "startMonth": 5,
+  "startDay": 1,
+  "endYear": 2025,
+  "endMonth": 5,
+  "endDay": 15,
+  "status": "todo",
+  "assigneeId": {{assigneeId}},
+  "tags": ["개발", "백엔드", "Prisma"],
+  "attachments": [
+    "https://example.com/files/schema.pdf",
+    "https://example.com/files/diagram.png"
+  ]
+}
+
+### 생성된 할 일 ID 저장
+@taskId = {{createTask.response.body.id}}
+
+
+### [2] 프로젝트의 할 일 목록 조회 (기본)
+GET {{baseUrl}}/projects/{{projectId}}/tasks?page=1&limit=10
+Authorization: Bearer {{accessToken}}
+
+
+### [3] 프로젝트의 할 일 목록 조회 (필터링 및 정렬)
+# 상태: todo, 담당자ID: 2, 검색어: Prisma, 정렬: 마감기한순
+GET {{baseUrl}}/projects/{{projectId}}/tasks?status=todo&assignee={{assigneeId}}&keyword=Prisma&order=asc&order_by=end_date
+Authorization: Bearer {{accessToken}}
+
+
+### [4] 할 일 상세 조회
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+
+### [5] 할 일 수정 (담당자 및 상태 변경)
+# 담당자를 다른 멤버(예: ID 4)로 바꾸고 상태를 '진행중'으로 변경
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Prisma 마스터하기 (수정본)",
+  "assigneeId": 4,
+  "status": "in_progress",
+  "tags": ["백엔드", "공부중"]
+}
+
+
+### [6] 할 일 삭제 (DELETE)
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+
+
+### [7] 삭제 확인 (404가 나오는지 확인)
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
