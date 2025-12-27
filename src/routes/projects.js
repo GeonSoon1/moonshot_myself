@@ -1,6 +1,7 @@
 import express from "express";
 import prisma from "../lib/prisma.js";
 import { authenticateToken } from "../middlewares/auth.js";
+import { formatTask } from './tasks.js'
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ async function getProjectWithCounts(projectId) {
       },
     },
   });
-  console.log("projectId로 가져온 project의 row : ", project);
+  // console.log("projectId로 가져온 project의 row : ", project);
 
   if (!project) return null;
 
@@ -367,5 +368,128 @@ router.delete("/:projectId/users/:userId", authenticateToken, async (req, res) =
     }
   }
 );
+
+
+/**
+ * [1] 프로젝트에 할 일 생성
+ * POST /projects/:projectId/tasks
+ */
+router.post("/:projectId/tasks", authenticateToken, async (req, res) => {
+  const { projectId } = req.params;
+  const currentUserId = req.userId; // 현재 로그인한 사람
+  
+  const { 
+    title, startYear, startMonth, startDay, 
+    endYear, endMonth, endDay, status, tags, attachments 
+  } = req.body;
+
+  try {
+    const pId = Number(projectId);
+
+    // 1. 내가 해당 프로젝트의 멤버인지 확인
+    // (내가 멤버여야 이 프로젝트에 글을 쓸 수 있고, 나를 담당자로 지정할 수 있으니까요)
+    const myMember = await prisma.projectMember.findUnique({
+      where: { 
+        projectId_memberId: { 
+          projectId: pId, 
+          memberId: currentUserId 
+        } 
+      }
+    });
+
+    if (!myMember) {
+      return res.status(403).json({ message: "프로젝트 멤버가 아닙니다" });
+    }
+
+    // 2. 날짜 생성
+    const startDate = new Date(startYear, startMonth - 1, startDay);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
+    
+    // 3. 할 일 생성
+    const task = await prisma.task.create({
+      data: {
+        title,
+        status: status.toUpperCase(), 
+        startDate,
+        endDate,
+        projectId: pId,
+        // 만든 사람과 담당자를 모두 현재 로그인한 유저(나)로 설정!
+        taskCreatorId: currentUserId,
+        assigneeProjectMemberId: currentUserId, 
+        
+        taskTags: {
+          create: tags?.map(name => ({
+            tag: { connectOrCreate: { where: { name }, create: { name } } }
+          }))
+        },
+        attachments: {
+          create: attachments?.map(url => ({ url }))
+        }
+      },
+      include: {
+        assigneeProjectMember: { include: { member: true } },
+        taskTags: { include: { tag: true } },
+        attachments: true
+      }
+    });
+    console.log(task)
+    return res.status(200).json(formatTask(task));
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ message: "잘못된 요청 형식" });
+  }
+});
+
+
+/**
+ * [2] 프로젝트의 할 일 목록 조회
+ * GET /projects/:projectId/tasks
+ */
+router.get("/:projectId/tasks", authenticateToken, async (req, res) => {
+  const { projectId } = req.params;
+  const { page = 1, limit = 10, status, assignee, keyword, order = 'desc', order_by = 'created_at' } = req.query;
+
+  try {
+    const pId = Number(projectId);
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // 필터 조건 구성
+    const where = {
+      projectId: pId,
+      ...(status && { status: status.toUpperCase() }),
+      ...(assignee && { assigneeProjectMemberId: Number(assignee) }),
+      ...(keyword && { title: { contains: keyword, mode: 'insensitive' } }),
+    };
+
+    // 정렬 조건 구성
+    const orderByMap = {
+      created_at: { createdAt: order },
+      name: { title: order },
+      end_date: { endDate: order }
+    };
+
+    const [tasks, total] = await prisma.$transaction([
+      prisma.task.findMany({
+        where,
+        skip,
+        take: Number(limit),
+        orderBy: orderByMap[order_by] || { createdAt: 'desc' },
+        include: {
+          assigneeProjectMember: { include: { member: true } },
+          taskTags: { include: { tag: true } },
+          attachments: true
+        }
+      }),
+      prisma.task.count({ where })
+    ]);
+
+    return res.status(200).json({
+      data: tasks.map(t => formatTask(t)),
+      total
+    });
+  } catch (error) {
+    return res.status(400).json({ message: "잘못된 요청 형식" });
+  }
+});
 
 export default router;
