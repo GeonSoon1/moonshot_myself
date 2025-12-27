@@ -195,4 +195,139 @@ router.delete("/:taskId", authenticateToken, async (req, res) => {
   }
 });
 
+
+/**
+ * [1] 댓글 등록
+ * POST /tasks/:taskId/comments
+ */
+router.post("/:taskId/comments", authenticateToken, async (req, res) => {
+  const { taskId } = req.params;
+  const { content } = req.body;
+  const currentUserId = req.userId;
+
+  try {
+    const tId = Number(taskId);
+
+    // 1. 해당 태스크가 존재하는지 확인 및 프로젝트 ID 추출
+    const task = await prisma.task.findUnique({
+      where: { id: tId }
+    });
+    if (!task) return res.status(404).json({ message: "할 일을 찾을 수 없습니다" });
+
+    // 2. 작성자가 해당 프로젝트의 멤버인지 확인
+    const authorMember = await prisma.projectMember.findUnique({
+      where: { 
+        projectId_memberId: { 
+          projectId: task.projectId, 
+          memberId: currentUserId 
+        } 
+      }
+    });
+
+    if (!authorMember) {
+      return res.status(403).json({ message: "프로젝트 멤버만 댓글을 달 수 있습니다" });
+    }
+
+    // 3. 댓글 생성
+    const comment = await prisma.comment.create({
+      data: {
+        content,
+        taskId: tId,
+        projectId: task.projectId,
+        authorId: currentUserId, // ProjectMember의 memberId와 매칭됨
+      },
+      include: {
+        author: {
+          include: { member: true } // 작성자 이름, 이미지 포함을 위함
+        }
+      }
+    });
+
+    return res.status(201).json(formatComment(comment));
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ message: "잘못된 요청 형식" });
+  }
+});
+
+
+/**
+ * [2] 할 일에 달린 댓글 조회
+ * GET /tasks/:taskId/comments
+ */
+router.get("/:taskId/comments", authenticateToken, async (req, res) => {
+  const { taskId } = req.params;
+  // 1. 페이지네이션 파라미터 추출 (기본값 설정)
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const tId = Number(taskId);
+
+    // 2. 트랜잭션으로 댓글 목록과 전체 개수를 동시에 조회
+    const [comments, total] = await prisma.$transaction([
+      prisma.comment.findMany({
+        where: { taskId: tId },
+        include: {
+          author: {
+            include: { member: true } // 작성자의 이름, 이메일, 이미지를 가져오기 위함
+          }
+        },
+        skip: skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' } // 최신 댓글이 위로 오도록 정렬 (기획에 따라 'asc'로 변경 가능)
+      }),
+      prisma.comment.count({
+        where: { taskId: tId }
+      })
+    ]);
+
+    // 3. 명세서 이미지의 응답 데이터 형식으로 가공
+    const formattedData = comments.map(comment => ({
+      id: comment.id,
+      content: comment.content,
+      taskId: comment.taskId,
+      author: {
+        id: comment.author.member.id,
+        name: comment.author.member.name,
+        email: comment.author.member.email,
+        profileImage: comment.author.member.profileImage
+      },
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt
+    }));
+
+    // 4. 최종 응답 { data: [], total: n }
+    return res.status(200).json({
+      data: formattedData,
+      total: total
+    });
+
+  } catch (error) {
+    console.error("댓글 조회 오류:", error);
+    return res.status(400).json({ message: "잘못된 요청 형식" });
+  }
+});
+
+
+/**
+ * [헬퍼 함수] 댓글 데이터를 명세서 형식으로 변환
+ */
+function formatComment(comment) {
+  return {
+    id: comment.id,
+    content: comment.content,
+    taskId: comment.taskId,
+    author: {
+      id: comment.author.member.id,
+      name: comment.author.member.name,
+      email: comment.author.member.email,
+      profileImage: comment.author.member.profileImage
+    },
+    createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt
+  };
+}
+
 export default router;

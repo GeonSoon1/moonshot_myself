@@ -4,6 +4,7 @@ import authRoutes from './routes/auth.js';
 import projectRoutes from './routes/projects.js';
 import invitationRoutes from './routes/invitations.js'
 import taskRoutes from './routes/tasks.js'
+import commentRoutes from './routes/comments.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use('/auth', authRoutes);
 app.use('/projects', projectRoutes);
 app.use('/invitations', invitationRoutes)
 app.use('/tasks', taskRoutes)
+app.use('/comments', commentRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
