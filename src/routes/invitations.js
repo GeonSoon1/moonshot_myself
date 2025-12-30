@@ -48,7 +48,7 @@ router.post("/:invitationId/accept", authenticateToken, async (req, res) => {
 
 
 /**
- * [멤버 초대 삭제]
+ * [멤버 초대 삭제] (소프트 delete)
  * DELETE /invitations/:invitationId
  */
 router.delete("/invitations/:invitationId", authenticateToken, async (req, res) => {

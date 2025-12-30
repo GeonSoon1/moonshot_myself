@@ -2,8 +2,94 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
+import axios from "axios";
 
 const router = express.Router();
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_CALLBACK_URL = "http://localhost:3000/auth/google/callback";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3001";
+
+// console.log('GOOGLE_CLIENT_ID : ', GOOGLE_CLIENT_ID)
+
+// [1] 구글 로그인 시작 (GET /auth/GOOGLE)
+router.get("/GOOGLE", (req, res) => {
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&response_type=code&scope=email profile`;
+  res.redirect(url);
+});
+
+// [2] 구글 콜백 처리 (GET /auth/google/callback)
+router.get("/google/callback", async (req, res) => {
+  const { code } = req.query;
+
+  try {
+    // 1. 구글 토큰 받기
+    const tokenResponse = await axios.post("https://oauth2.googleapis.com/token", {
+      code,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: GOOGLE_CALLBACK_URL,
+      grant_type: "authorization_code",
+    });
+
+    const { access_token } = tokenResponse.data;
+
+    // 2. 구글 유저 정보 가져오기
+    const userResponse = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    const googleUser = userResponse.data;
+
+    // 3. DB 저장 (트랜잭션)
+    const user = await prisma.$transaction(async (tx) => {
+      let user = await tx.user.findUnique({ where: { email: googleUser.email } });
+
+      if (!user) {
+        user = await tx.user.create({
+          data: {
+            email: googleUser.email,
+            name: googleUser.name,
+            profileImage: googleUser.picture,
+          },
+        });
+      }
+
+      // OAuth 계정 정보 연결 (upsert: 있으면 업데이트, 없으면 생성)
+      await tx.oAuthAccount.upsert({
+        where: {
+          oauth_provider_account_unique: {
+            provider: "GOOGLE",
+            providerAccountId: googleUser.id,
+          },
+        },
+        update: { accessToken: access_token },
+        create: {
+          provider: "GOOGLE",
+          providerAccountId: googleUser.id,
+          accessToken: access_token,
+          userId: user.id,
+        },
+      });
+
+      return user;
+    });
+
+    // 4. 우리 서비스용 토큰 발행
+    const ourAccessToken = jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, { expiresIn: "1h" });
+    const ourRefreshToken = jwt.sign({ userId: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+
+    // 5. 프론트엔드로 토큰과 함께 리다이렉트
+    res.redirect(`${FRONTEND_URL}/auth/callback?accessToken=${ourAccessToken}&refreshToken=${ourRefreshToken}`);
+
+  } catch (error) {
+    console.error("구글 로그인 실패:", error);
+    res.redirect(`${FRONTEND_URL}/login?error=oauth_failed`);
+  }
+});
+
+
 
 // A가 truthy면 → A를 반환 , A가 falsy면 → B를 반환
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "access_secret_key";
