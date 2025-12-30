@@ -1,10 +1,11 @@
 @baseUrl = http://localhost:3000
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc2NjgzOTUxOSwiZXhwIjoxNzY3MDk4NzE5fQ.0oOW3tXYKeYMKJTQD8mXHbKnaacCgurjMMbPhPfx_UM
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc2NzA4MDgyNSwiZXhwIjoxNzY3MzQwMDI1fQ.Lp0HrhVs8YWdJ1Bkha6HlxuCk9IPwP7bVNSaw0kbFTw
+
 
 
 # 테스트에 사용할 ID들 (본인의 DB 상황에 맞게 수정하세요)
-@projectId = 5
-@assigneeId = 7
+@projectId = 7
+@assigneeId = 6
 
 ### [1] 프로젝트에 할 일 생성
 # @name createTask

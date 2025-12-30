@@ -25,9 +25,9 @@ model User {
 model OAuthAccount {
   id                Int           @id @default(autoincrement())
   provider          OAuthProvider
-  providerAccountId String //sub?
+  providerAccountId String // sub?
   accessToken       String?
-  refreshToken      String?
+  refreshToken      String? // 암호화(양방향)?
   expiresAt         DateTime?
   scope             String[]
   userId            Int

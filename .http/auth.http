@@ -7,9 +7,9 @@ POST {{baseUrl}}/auth/register
 Content-Type: {{contentType}}
 
 {
-  "email": "commentMember1@example.com",
+  "email": "test3@example.com",
   "password": "1234",
-  "name": "testuser2",
+  "name": "test3",
   "profileImage": "https://example.com/files/image.png"
 }
 

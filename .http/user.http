@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:3000
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc2Njg0NTUxOSwiZXhwIjoxNzY3MTA0NzE5fQ.9-zqSNh3dO2_mcXcQODqGKMhlPQHtslBsc9LnIdjukY
+
+### [1] 내 정보 조회
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+
+### [2] 내 정보 수정 (이름 및 비밀번호 변경)
+PATCH {{baseUrl}}/users/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "testuser3",
+  "currentPassword": "newPassword456",
+  "newPassword": "1234"
+}
+
+### [3] 참여 중인 프로젝트 조회
+GET {{baseUrl}}/users/me/projects?page=1&limit=5&order=desc&order_by=created_at
+Authorization: Bearer {{accessToken}}
+
+### [4] 참여 중인 모든 프로젝트의 할 일 조회 (필터링)
+GET {{baseUrl}}/users/me/tasks?status=todo&keyword=Prisma
+Authorization: Bearer {{accessToken}}

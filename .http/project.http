@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc2NjgzOTUxOSwiZXhwIjoxNzY3MDk4NzE5fQ.0oOW3tXYKeYMKJTQD8mXHbKnaacCgurjMMbPhPfx_UM
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc2NzA4MDI4MCwiZXhwIjoxNzY3MzM5NDgwfQ.ChTqSt6Tf9Oc3G-gquWiFN8_m_AQHtFkiEmOL06NDHQ
 
 ### 1. 프로젝트 생성 (성공)
 # @name createProject

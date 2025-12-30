@@ -195,7 +195,7 @@ router.delete("/:projectId", authenticateToken, async (req, res) => {
 // [1] 멤버 초대하기 (POST /projects/:projectId/invitations)
 router.post("/:projectId/invitations", authenticateToken, async (req, res) => {
   const { projectId } = req.params;
-  const { email } = req.body;
+  const { email } = req.body; // email이 body로 들어오지 않는다.(명세표)
 
   // 현재 로그인 한 사람
   const currentUserId = req.userId;
