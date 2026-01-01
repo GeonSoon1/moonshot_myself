@@ -1,6 +1,6 @@
 import express from "express";
-import prisma from "../lib/prisma.js";
-import { authenticateToken } from "../middlewares/auth.js";
+import prisma from "../lib/prismaClient.js";
+import { authenticateToken } from "../middlewares/authenticate.js";
 
 const router = express.Router();
 
@@ -33,6 +33,9 @@ export function formatTask(task) {
   };
 }
 
+// 1. 우선 현재 작업 계층화 진행하기(09:00 ~ 12:00)
+// 2. task 관련해서 이해하기(13:00 ~ 17:00)
+// 3. 옮기기 (17:00 ~ 19:00)
 
 /**
  * [3] 할 일 상세 조회

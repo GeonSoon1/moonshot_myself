@@ -1,15 +1,15 @@
 @baseUrl = http://localhost:3000
 
 # 1. 소유자(Owner)의 토큰을 여기에 넣으세요
-@ownerToken =  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc2NzA4MDI4MCwiZXhwIjoxNzY3MzM5NDgwfQ.ChTqSt6Tf9Oc3G-gquWiFN8_m_AQHtFkiEmOL06NDHQ
+@ownerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJpYXQiOjE3NjcyNjU4MzgsImV4cCI6MTc2NzUyNTAzOH0.hDrAPSX-eEbl_m2mi7z12-21CLgtwf4-jnP9Tn8_vcg
 
 
 # 2. 초대받을 사람(Friend)의 토큰을 여기에 넣으세요
-@inviteeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc2NzA4MDgyNSwiZXhwIjoxNzY3MzQwMDI1fQ.Lp0HrhVs8YWdJ1Bkha6HlxuCk9IPwP7bVNSaw0kbFTw
+@inviteeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI1LCJpYXQiOjE3NjcyNjU4NjAsImV4cCI6MTc2NzUyNTA2MH0.-J9zsQqxkfaFpjsRnP1T7uU4Q5iAl8c-R8u5r0Sifuw
 
 
-# 테스트할 프로젝트 ID
-@projectId = 7
+# 초대 할 프로젝트 ID
+@projectId = 30
 
 ### [1] 멤버 초대 보내기 (소유자가 실행)
 # @name sendInvite
@@ -18,11 +18,11 @@ Content-Type: application/json
 Authorization: Bearer {{ownerToken}}
 
 {
-  "email": "test3@example.com"
+  "email": "test14@example.com"
 }
 
 ### 생성된 초대 ID 저장 (UUID)
-@invitationId = {{sendInvite.response.body.invitationId}}
+@invitationId = 6afc3df7-f9dd-4d9d-bd90-638ac00951ac
 
 
 ### [2] 프로젝트 멤버 목록 조회 (현재 상태 확인)

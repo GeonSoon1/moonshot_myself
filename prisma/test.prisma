@@ -1,52 +1,76 @@
-// generator client {
-//   provider = "prisma-client-js"
-// }
+// // generator client {
+// //   provider = "prisma-client-js"
+// // }
 
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-// }
+// // datasource db {
+// //   provider = "postgresql"
+// //   url      = env("DATABASE_URL")
+// // }
+
+// // model User {
+// //   id       Int       @id @default(autoincrement())
+// //   name     String
+// //   posts    Post[]
+// //   comments Comment[]
+// // }
+
+// // model Post {
+// //   id       Int       @id @default(autoincrement())
+// //   title    String
+// //   authorId Int
+// //   author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+// //   comments Comment[]
+// // }
+
+// // model Comment {
+// //   id       Int  @id @default(autoincrement())
+// //   writerId Int
+// //   postId   Int
+// //   writer   User @relation(fields: [writerId], references: [id], onDelete: Cascade)
+// //   post     Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+// // }
+// // // User테이블과 관계가 있는 Comment테이블에서 writerId가 User테이블의 PK를 참조하니까
+// // // Comment테이블에 있는 writerId가 1인 row들을 User테이블의 comments의 value값으로 배열형태로 넣어준다.
+
+
+// // // [문제 4] "유저의 활동 내역 종합 세트"
+// // // 상황: 관리자 페이지에서 1번 유저의 모든 활동을 한눈에 보려고 합니다.
+// // // 미션:
+// // // 1번 유저(id: 1)를 찾는데, 다음 정보들을 한 번에 가져오세요.
+// // // 이 유저가 쓴 모든 게시글(Post) 목록.
+// // // 이 유저가 쓴 모든 댓글(Comment) 목록.
+// // // (중요!) 댓글 목록을 가져올 때, 그 댓글이 어느 게시글(post)에 달린 건지 그 게시글의 제목(title)도 포함하세요
+
+
+// // // [문제 5] "알림 센터: 댓글의 원천을 찾아서"
+// // // 상황: 누군가 내 글에 댓글을 달았다는 알림이 떴습니다. 시스템은 **특정 댓글(ID: 100번)**의 정보를 분석해야 합니다.
+// // // 미션:
+// // // 댓글 ID가 100번인 것을 찾고, 다음을 모두 포함하세요.
+// // // 이 댓글을 쓴 작성자(writer)의 이름.
+// // // 이 댓글이 달린 게시글(post)의 제목.
+// // // (심화) 그 게시글을 쓴 원래 글쓴이(author)의 이름.
+// // // 힌트: Comment 모델에서 출발합니다. writer를 가져오고, 동시에 post를 가져오는데, 그 post 안에서 다시 author를 가져와야 합니다.
+
+// // schema.prisma (간략화)
 
 // model User {
-//   id       Int       @id @default(autoincrement())
-//   name     String
-//   posts    Post[]
-//   comments Comment[]
+//   id    Int     @id @default(autoincrement())
+//   name  String
+//   posts Post[]  // 한 사용자가 쓴 여러 포스트
 // }
 
 // model Post {
-//   id       Int       @id @default(autoincrement())
-//   title    String
-//   authorId Int
-//   author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-//   comments Comment[]
+//   id         Int        @id @default(autoincrement())
+//   title      String
+//   author     User       @relation(fields: [authorId], references: [id])
+//   authorId   Int
+//   categories Category[] // 다대다 관계
 // }
 
-// model Comment {
-//   id       Int  @id @default(autoincrement())
-//   writerId Int
-//   postId   Int
-//   writer   User @relation(fields: [writerId], references: [id], onDelete: Cascade)
-//   post     Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+// model Category {
+//   id    Int    @id @default(autoincrement())
+//   name  String
+//   posts Post[]
 // }
-// // User테이블과 관계가 있는 Comment테이블에서 writerId가 User테이블의 PK를 참조하니까
-// // Comment테이블에 있는 writerId가 1인 row들을 User테이블의 comments의 value값으로 배열형태로 넣어준다.
 
 
-// // [문제 4] "유저의 활동 내역 종합 세트"
-// // 상황: 관리자 페이지에서 1번 유저의 모든 활동을 한눈에 보려고 합니다.
-// // 미션:
-// // 1번 유저(id: 1)를 찾는데, 다음 정보들을 한 번에 가져오세요.
-// // 이 유저가 쓴 모든 게시글(Post) 목록.
-// // 이 유저가 쓴 모든 댓글(Comment) 목록.
-// // (중요!) 댓글 목록을 가져올 때, 그 댓글이 어느 게시글(post)에 달린 건지 그 게시글의 제목(title)도 포함하세요
-
-
-// // [문제 5] "알림 센터: 댓글의 원천을 찾아서"
-// // 상황: 누군가 내 글에 댓글을 달았다는 알림이 떴습니다. 시스템은 **특정 댓글(ID: 100번)**의 정보를 분석해야 합니다.
-// // 미션:
-// // 댓글 ID가 100번인 것을 찾고, 다음을 모두 포함하세요.
-// // 이 댓글을 쓴 작성자(writer)의 이름.
-// // 이 댓글이 달린 게시글(post)의 제목.
-// // (심화) 그 게시글을 쓴 원래 글쓴이(author)의 이름.
-// // 힌트: Comment 모델에서 출발합니다. writer를 가져오고, 동시에 post를 가져오는데, 그 post 안에서 다시 author를 가져와야 합니다.
