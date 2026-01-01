@@ -1,7 +1,7 @@
 export function asyncHandler(handler) {
   return async function (req, res, next) {
     try {
-      console.log('asyncHandler까지 정상 작동')
+      console.log('asyncHandler까지 넘어옴')
       await handler(req, res, next);
     } catch (e) {
       // asyncHandler의 catch(e)가 에러를 잡아 errorHandler에게 넘긴다.

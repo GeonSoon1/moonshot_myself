@@ -1,0 +1,23 @@
+export const formatTask = (task) => ({
+  id: task.id,
+  projectId: task.projectId,
+  title: task.title,
+  description: task.description,
+  startYear: task.startDate.getFullYear(),
+  startMonth: task.startDate.getMonth() + 1,
+  startDay: task.startDate.getDate(),
+  endYear: task.endDate.getFullYear(),
+  endMonth: task.endDate.getMonth() + 1,
+  endDay: task.endDate.getDate(),
+  status: task.status.toLowerCase(),
+  assignee: task.assigneeProjectMember ? {
+    id: task.assigneeProjectMember.member.id,
+    name: task.assigneeProjectMember.member.name,
+    email: task.assigneeProjectMember.member.email,
+    profileImage: task.assigneeProjectMember.member.profileImage,
+  } : null,
+  tags: task.taskTags?.map(tt => ({ id: tt.tag.id, name: tt.tag.name })) || [],
+  attachments: task.attachments?.map(a => a.url) || [],
+  createdAt: task.createdAt,
+  updatedAt: task.updatedAt,
+});

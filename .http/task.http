@@ -1,11 +1,10 @@
 @baseUrl = http://localhost:3000
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc2NzA4MDgyNSwiZXhwIjoxNzY3MzQwMDI1fQ.Lp0HrhVs8YWdJ1Bkha6HlxuCk9IPwP7bVNSaw0kbFTw
-
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJpYXQiOjE3NjcyNjU4MzgsImV4cCI6MTc2NzUyNTAzOH0.hDrAPSX-eEbl_m2mi7z12-21CLgtwf4-jnP9Tn8_vcg
 
 
 # 테스트에 사용할 ID들 (본인의 DB 상황에 맞게 수정하세요)
-@projectId = 7
-@assigneeId = 6
+@projectId = 30
+@assigneeId = 25
 
 ### [1] 프로젝트에 할 일 생성
 # @name createTask
@@ -58,7 +57,7 @@ Authorization: Bearer {{accessToken}}
 
 {
   "title": "Prisma 마스터하기 (수정본)",
-  "assigneeId": 4,
+  "assigneeId": 24,
   "status": "in_progress",
   "tags": ["백엔드", "공부중"]
 }

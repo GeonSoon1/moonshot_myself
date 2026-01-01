@@ -9,6 +9,7 @@ import express from "express";
 import authRouter from "./routers/auth.router.js";
 import projectRouter from "./routers/project.router.js";
 import memberRouter from "./routers/member.router.js"
+import taskRouter from "./routers/task.router.js"
 import cors from "cors";
 
 const app = express();
@@ -16,6 +17,7 @@ const app = express();
 app.use(express.json());
 
 // 라우터 연결
+app.use('/', taskRouter)
 app.use("/auth", authRouter);
 app.use("/projects", projectRouter);
 app.use('/invitations', memberRouter)

@@ -4,6 +4,7 @@ const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "access_secret_key";
 
 export const authenticate = (req, res, next) => {
   // console.log('req :',req)
+  console.log('req.headers :', req.headers)
   const authHeader = req.headers["authorization"];
   // Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2NjcyNjA2MCwiZXhwIjoxNzY3MzMwODYwfQ.pmHjeVgX3mSsBS3J6eCavoPrm3fT6kWPfsqZkJ2b2As
   const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
@@ -29,7 +30,7 @@ export const authenticate = (req, res, next) => {
       id : payload.userId
     }
     
-    // console.log('req.userId : ', req.userId)
+    console.log('req.user.id : ', req.user.id)
     next();
   });
 };

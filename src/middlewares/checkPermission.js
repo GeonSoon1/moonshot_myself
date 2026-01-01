@@ -15,6 +15,7 @@ async function resolveProjectId(params) {
   }
   // 2. 할 일 ID가 있는 경우
   if (params.taskId) {
+    // console.log('할 일 ID가 있는 경우 거쳐가나?')
     const task = await prisma.task.findUniqueOrThrow({ where: { id: Number(params.taskId) } });
     return task.projectId;
   }
@@ -53,9 +54,14 @@ export const projectOwner = asyncHandler(async (req, res, next) => {
 
 // [2] 프로젝트 멤버 확인
 export const projectMember = asyncHandler(async (req, res, next) => {
+  console.log('projectMember의 req.params :', req.params)
   const projectId = await resolveProjectId(req.params);
   if (!projectId) return res.status(400).json({ message: "프로젝트 번호가 없습니다." });
-
+  
+  // 할 일을 만든 사람이 해당 프로젝트의 멤버인지 확인하는 절차.
+  console.log('projectMember에서 projectId :', projectId)
+  console.log('projectMember에서 memberId(할 일 생성자) :', req.user.id)
+  // 할 일 생성자의 (projectId, memberId가 일치 하는지 확인)
   const membership = await prisma.projectMember.findUnique({
     where: {
       projectId_memberId: {
@@ -64,7 +70,7 @@ export const projectMember = asyncHandler(async (req, res, next) => {
       }
     }
   });
-
+  console.log('할 일 생성자의 projectMember 테이블에서의 row :', membership)
   if (!membership) {
     return res.status(403).json({ message: "프로젝트 멤버가 아닙니다." });
   }
